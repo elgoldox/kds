@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Visualización de Cocina (KDS)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f3f4f6;
+            margin: 0;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 80%;
+        }
+        .order {
+            background-color: #ffe599;
+            border: 2px solid #f39c12;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+        }
+        .ready {
+            background-color: #b6d7a8;
+            border: 2px solid #27ae60;
+        }
+        .timer {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background-color: #f39c12;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+        button {
+            margin-top: 10px;
+            background-color: #27ae60;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #219653;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="orders">
+        <!-- Pedidos aparecerán aquí -->
+    </div>
+
+    <script>
+        const orders = [
+            { id: 1, table: 5, items: ['Hamburguesa', 'Papas', 'Refresco'], status: 'En Proceso', time: 300 },
+            { id: 2, table: 3, items: ['Pizza', 'Ensalada'], status: 'En Proceso', time: 600 },
+            { id: 3, table: 8, items: ['Pasta', 'Vino'], status: 'Listo', time: 0 }
+        ];
+
+        function renderOrders() {
+            const container = document.getElementById('orders');
+            container.innerHTML = '';
+
+            orders.forEach(order => {
+                const orderDiv = document.createElement('div');
+                orderDiv.className = `order ${order.status === 'Listo' ? 'ready' : ''}`;
+
+                orderDiv.innerHTML = `
+                    <div class="timer">${formatTime(order.time)}</div>
+                    <h3>Mesa ${order.table}</h3>
+                    <ul>${order.items.map(item => `<li>${item}</li>`).join('')}</ul>
+                    <p><strong>${order.status}</strong></p>
+                    ${order.status !== 'Listo' ? `<button onclick="markAsReady(${order.id})">Marcar como Listo</button>` : ''}
+                `;
+
+                container.appendChild(orderDiv);
+            });
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function startTimer() {
+            setInterval(() => {
+                orders.forEach(order => {
+                    if (order.status !== 'Listo' && order.time > 0) {
+                        order.time--;
+                    }
+                });
+                renderOrders();
+            }, 1000);
+        }
+
+        function markAsReady(id) {
+            const order = orders.find(order => order.id === id);
+            if (order) {
+                order.status = 'Listo';
+                renderOrders();
+                new Audio('https://www.soundjay.com/button/beep-07.wav').play();
+            }
+        }
+
+        window.onload = () => {
+            renderOrders();
+            startTimer();
+        };
+    </script>
+</body>
+</html>
